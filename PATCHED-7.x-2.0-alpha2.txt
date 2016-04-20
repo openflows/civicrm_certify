@@ -1,0 +1,53 @@
+diff --git a/modules/contrib-patched/civicrm_certify/civicrm.api.inc b/modules/c
+index 7f603ae..b50fd93 100644
+--- a/modules/contrib-patched/civicrm_certify/civicrm.api.inc
++++ b/modules/contrib-patched/civicrm_certify/civicrm.api.inc
+@@ -9,13 +9,25 @@ function _civicrm_certify_get_civigroups() {
+     return null;
+   }
+
++  // CHARLOTTA BEAVERS, OPENFLOWS - PATCH
++  // patch to civicrm_certify 7.x-2.0-alpha2
++  // increase limit and allow for parent group to be used for cert groups
++  // TODO: need to allow for the user to select the parent group
++  // and then look up the parent group
++  // this can be on the certifications page or a settings page
++  // also account for certification groups not having a parent group
+   $params = array(
+     'version' => 3,
+     'is_active' => 1,
+-  );
+-
++    // state explicitly since default index differs in Civi versions
++    'sequential' => 0,
++    'parents' => 103,    // only those in certifications parent group
++    'options' => array(
++        'limit' => 1000, // otherwise it will be limited to 25
++      )
++  );
+   $result = civicrm_api( 'group','get',$params );
+-
++
+   return $result;
+ }
+
+================================================================================ 
+ 
+diff --git a/modules/contrib-patched/civicrm_certify/civicrm_certify.module b/mo
+index 51ce9a2..1460c26 100644
+--- a/modules/contrib-patched/civicrm_certify/civicrm_certify.module
++++ b/modules/contrib-patched/civicrm_certify/civicrm_certify.module
+@@ -993,6 +993,12 @@ function field_cert_rule_civigroup_values(){
+   foreach ($groups['values'] as $index => $group) {
+     $options[$index] = $group['title'];
+   }
++
++  // CHARLOTTA BEAVERS, OPENFLOWS - PATCH
++  // patch to civicrm_certify 7.x-2.0-alpha2
++  // add so that options will appear in sorted
++  asort($options);
++
+   return $options;
+ }
+
+================================================================================
